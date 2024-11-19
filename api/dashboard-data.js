@@ -24,10 +24,10 @@ function runMiddleware(req, res, fn) {
 
 // Create a MySQL connection pool
 const db = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: bytewise24.c7m6iwuy4p5v.ap-south-1.rds.amazonaws.com,
+  user:admin24,
+  password:bytewise24,
+  database:bytewise_db,
 });
 
 export default async function handler(req, res) {
