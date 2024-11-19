@@ -1,4 +1,26 @@
+
 import mysql from 'mysql2/promise';
+import Cors from 'cors';
+
+// Initialize CORS middleware
+const cors = Cors({
+  methods: ['GET'], // Specify allowed methods
+  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
+  credentials: true, // Allow cookies if needed
+});
+
+// Helper function to run middleware
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
 // Create a MySQL connection pool
 const db = mysql.createPool({
@@ -9,6 +31,19 @@ const db = mysql.createPool({
 });
 
 export default async function handler(req, res) {
+  // Enable CORS for this API route
+  await runMiddleware(req, res, cors);
+
+  // Handle OPTIONS request (preflight)
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    return res.status(200).end(); // Preflight response
+  }
+
+  // Only allow GET requests
   if (req.method !== 'GET') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }

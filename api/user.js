@@ -1,3 +1,4 @@
+
 import mysql from 'mysql2/promise';
 import Cors from 'cors';
 
@@ -5,7 +6,7 @@ import Cors from 'cors';
 const cors = Cors({
   methods: ['GET', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'], // Allow necessary headers
-  origin: 'https://bytewise24.vercel.app', // Set your frontend URL
+  origin: 'https://admin-bytewise24.vercel.app', // Set your frontend URL
   credentials: true, // Allow cookies if needed
 });
 
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Origin', 'https://bytewise24.vercel.app'); // Set your frontend URL
+    res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Set your frontend URL
     res.setHeader('Access-Control-Allow-Credentials', 'true'); // Allow credentials (cookies, etc.)
     return res.status(200).end();
   }
