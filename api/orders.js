@@ -48,10 +48,10 @@ export default async function handler(req, res) {
   }
 
   const { orderID } = req.query; // Extract orderID from the query parameters
-  const { completeStatus } = req.body; // Extract completeStatus from the request body
+  const { data } = req.body; // Extract completeStatus from the request body
 
   // Validate inputs
-  if (!orderID || !completeStatus) {
+  if (!data.orderID || !data.completeStatus) {
     return res.status(400).json({ message: 'Order ID and completeStatus are required' });
   }
 
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     // Update order status in the database
     const [result] = await conn.query(
       'UPDATE orders SET completeStatus = ? WHERE orderID = ?',
-      [completeStatus, orderID]
+      [data.completeStatus, data.orderID]
     );
 
     // Release the connection back to the pool
