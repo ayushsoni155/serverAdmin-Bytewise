@@ -1,12 +1,15 @@
-
 import mysql from 'mysql2/promise';
 import Cors from 'cors';
+import express from 'express';
+
+// Initialize the router
+const router = express.Router();
 
 // Initialize CORS middleware
 const cors = Cors({
-  methods: ['GET', 'POST', 'OPTIONS'],
+  methods: ['GET', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  origin: 'https://admin-bytewise24.vercel.app', // Set your frontend URL
+  origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
   credentials: true,
 });
 
@@ -18,11 +21,36 @@ const db = mysql.createPool({
   database: process.env.DB_NAME,
 });
 
-const express = require('express');
-const router = express.Router();
+// Helper function to run middleware
+function runMiddleware(req, res, fn) {
+  return new Promise((resolve, reject) => {
+    fn(req, res, (result) => {
+      if (result instanceof Error) {
+        return reject(result);
+      }
+      return resolve(result);
+    });
+  });
+}
 
-// Apply CORS middleware to the route
-router.use(cors);
+// Apply CORS middleware to all requests handled by this router
+router.use(async (req, res, next) => {
+  try {
+    await runMiddleware(req, res, cors);
+    next();
+  } catch (err) {
+    res.status(500).json({ message: 'CORS error' });
+  }
+});
+
+// Handle preflight requests
+router.options('*', (req, res) => {
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app');
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  return res.status(204).end(); // No content for OPTIONS request
+});
 
 // Fetch orders data
 router.get('/ordersData', async (req, res) => {
@@ -52,9 +80,9 @@ router.get('/ordersData', async (req, res) => {
     const [results] = await db.query(query);
     res.json(results);
   } catch (error) {
-    console.error("Error fetching orders:", error);
-    res.status(500).json({ error: "Failed to fetch orders" });
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Failed to fetch orders' });
   }
 });
 
-module.exports = router;
+export default router;
