@@ -3,10 +3,10 @@ import Cors from 'cors';
 
 // Initialize CORS middleware
 const cors = Cors({
-  methods: ['PUT'], // Specify allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  methods: ['PUT', 'OPTIONS'], // Allow PUT and preflight
+  allowedHeaders: ['Content-Type', 'Authorization'],
   origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
-  credentials: true, // Allow cookies if needed
+  credentials: true, // Allow credentials if needed
 });
 
 // Helper function to run middleware
