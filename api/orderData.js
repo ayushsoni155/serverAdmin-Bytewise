@@ -53,7 +53,7 @@ router.options('*', (req, res) => {
 });
 
 // Fetch orders data
-router.get('/ordersData', async (req, res) => {
+router.get('/orderData', async (req, res) => {
   const query = `
     SELECT 
       orders.orderID,
