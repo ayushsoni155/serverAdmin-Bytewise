@@ -48,8 +48,9 @@ export default async function handler(req, res) {
       return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    // Extract data from the request body
-    const { orderID, completeStatus } = req.body;
+    // Extract orderID from the URL and completeStatus from req.body
+    const { orderID } = req.query; // Get orderID from the URL query parameters
+    const { completeStatus } = req.body; // Get completeStatus from the request body
 
     // Validate inputs
     if (!orderID || !completeStatus) {
