@@ -46,12 +46,10 @@ export default async function handler(req, res) {
   if (req.method !== 'PUT') {
     return res.status(405).json({ message: 'Method Not Allowed' });
   }
-
-  const { orderID } = req.query; // Extract orderID from the query parameters
-  const { data } = req.body; // Extract completeStatus from the request body
+  const { changeData } = req.body; // Extract completeStatus from the request body
 
   // Validate inputs
-  if (!data.orderID || !data.completeStatus) {
+  if (!changeData.orderID || !changeData.completeStatus) {
     return res.status(400).json({ message: 'Order ID and completeStatus are required' });
   }
 
