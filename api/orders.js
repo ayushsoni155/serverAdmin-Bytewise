@@ -30,51 +30,59 @@ const db = mysql.createPool({
 });
 
 export default async function handler(req, res) {
-  // Enable CORS for this API route
-  await runMiddleware(req, res, cors);
-
-  // Handle OPTIONS request (preflight)
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    return res.status(200).end(); // Preflight response
-  }
-
-  // Only allow PUT requests
-  if (req.method !== 'PUT') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
-  }
-  const { changeData } = req.body; // Extract completeStatus from the request body
-
-  // Validate inputs
-  if (!changeData.orderID || !changeData.completeStatus) {
-    return res.status(400).json({ message: 'Order ID and completeStatus are required' });
-  }
-
   try {
+    // Enable CORS for this API route
+    await runMiddleware(req, res, cors);
+
+    // Handle OPTIONS request (preflight)
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      return res.status(200).end(); // Preflight response
+    }
+
+    // Only allow PUT requests
+    if (req.method !== 'PUT') {
+      return res.status(405).json({ message: 'Method Not Allowed' });
+    }
+
+    // Extract data from the request body
+    const { orderID, completeStatus } = req.body;
+
+    // Validate inputs
+    if (!orderID || !completeStatus) {
+      return res.status(400).json({ message: 'Order ID and completeStatus are required' });
+    }
+
     // Get a connection from the pool
     const conn = await db.getConnection();
 
-    // Update order status in the database
-    const [result] = await conn.query(
-      'UPDATE orders SET completeStatus = ? WHERE orderID = ?',
-      [data.completeStatus, data.orderID]
-    );
+    try {
+      // Update order status in the database
+      const [result] = await conn.query(
+        'UPDATE orders SET completeStatus = ? WHERE orderID = ?',
+        [completeStatus, orderID]
+      );
 
-    // Release the connection back to the pool
-    conn.release();
+      // Release the connection back to the pool
+      conn.release();
 
-    // Check if any rows were updated
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Order not found' });
+      // Check if any rows were updated
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ message: 'Order not found' });
+      }
+
+      // Send a success response
+      return res.status(200).json({ message: 'Order status updated successfully!' });
+    } catch (queryError) {
+      // Release the connection in case of query failure
+      conn.release();
+      throw queryError;
     }
-
-    // Send a success response
-    res.status(200).json({ message: 'Order status updated successfully!' });
   } catch (error) {
     console.error('Error updating order status:', error);
-    res.status(500).json({ message: 'Failed to update order status' });
+    return res.status(500).json({ message: 'Failed to update order status' });
   }
 }
