@@ -77,6 +77,10 @@ export default async function handler(req, res) {
       'SELECT COUNT(*) AS totalOrders FROM orders WHERE DATE(order_date) = ?',
       [selectedDate]
     );
+     const [cancelledOrdersResult] = await conn.query(
+      'SELECT COUNT(*) AS cancelledOrders FROM orders WHERE completeStatus = "Cancelled" AND DATE(order_date) = ?`,
+      [selectedDate]
+    );
     const [itemDetailsResult] = await conn.query(
       `SELECT 
           oi.subject_code AS code,
@@ -103,6 +107,7 @@ export default async function handler(req, res) {
       totalUsers: totalUsersResult[0]?.totalUsers || 0,
       todaysSale: todaysSaleResult[0]?.todaysSale || 0,
       pendingOrders: pendingOrdersResult[0]?.pendingOrders || 0,
+      cancelledOrders:cencelledOrderResult[0]?.cancelledOrders || 0,
       deliveredOrders: deliveredOrdersResult[0]?.deliveredOrders || 0,
       totalOrders: totalOrdersResult[0]?.totalOrders || 0,
       itemDetails: itemDetailsResult || [],
