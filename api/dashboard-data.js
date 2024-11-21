@@ -1,4 +1,3 @@
-
 import mysql from 'mysql2/promise';
 import Cors from 'cors';
 
@@ -24,7 +23,7 @@ function runMiddleware(req, res, fn) {
 
 // Create a MySQL connection pool
 const db = mysql.createPool({
- host: process.env.DB_HOST,
+  host: process.env.DB_HOST,
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
@@ -73,12 +72,14 @@ export default async function handler(req, res) {
        WHERE completeStatus = "Completed" AND DATE(order_date) = ?`,
       [selectedDate]
     );
-    const [totalOrdersResult] = await conn.query(
-      'SELECT COUNT(*) AS totalOrders FROM orders WHERE DATE(order_date) = ?',
+    const [cancelledOrdersResult] = await conn.query(
+      `SELECT COUNT(*) AS cancelledOrders 
+       FROM orders 
+       WHERE completeStatus = "Cancelled" AND DATE(order_date) = ?`,
       [selectedDate]
     );
-     const [cancelledOrdersResult] = await conn.query(
-      'SELECT COUNT(*) AS cancelledOrders FROM orders WHERE completeStatus = "Cancelled" AND DATE(order_date) = ?`,
+    const [totalOrdersResult] = await conn.query(
+      'SELECT COUNT(*) AS totalOrders FROM orders WHERE DATE(order_date) = ?',
       [selectedDate]
     );
     const [itemDetailsResult] = await conn.query(
@@ -107,7 +108,7 @@ export default async function handler(req, res) {
       totalUsers: totalUsersResult[0]?.totalUsers || 0,
       todaysSale: todaysSaleResult[0]?.todaysSale || 0,
       pendingOrders: pendingOrdersResult[0]?.pendingOrders || 0,
-      cancelledOrders:cencelledOrderResult[0]?.cancelledOrders || 0,
+      cancelledOrders: cancelledOrdersResult[0]?.cancelledOrders || 0,
       deliveredOrders: deliveredOrdersResult[0]?.deliveredOrders || 0,
       totalOrders: totalOrdersResult[0]?.totalOrders || 0,
       itemDetails: itemDetailsResult || [],
