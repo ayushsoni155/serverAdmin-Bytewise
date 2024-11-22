@@ -3,7 +3,7 @@ import Cors from 'cors';
 
 // Initialize CORS middleware
 const cors = Cors({
-  methods: ['GET', 'PUT', 'OPTIONS'], // Allow GET, PUT, and preflight OPTIONS
+  methods: ['PUT', 'OPTIONS'], // Allow PUT and preflight
   allowedHeaders: ['Content-Type', 'Authorization'],
   origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
   credentials: true, // Allow credentials if needed
@@ -30,19 +30,24 @@ const db = mysql.createPool({
 });
 
 export default async function handler(req, res) {
-  // Enable CORS for this API route
-  await runMiddleware(req, res, cors);
+  try {
+    // Enable CORS for this API route
+    await runMiddleware(req, res, cors);
 
-  // Handle OPTIONS request (preflight)
-  if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    return res.status(200).end(); // Preflight response
-  }
+    // Handle OPTIONS request (preflight)
+    if (req.method === 'OPTIONS') {
+      res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+      return res.status(200).end(); // Preflight response
+    }
 
-  // Handle PUT request to update product details
+    // Only allow PUT requests
+    if (req.method !== 'PUT') {
+      return res.status(405).json({ message: 'Method Not Allowed' });
+    }
+ // Handle PUT request to update product details
   if (req.method === 'PUT') {
     const { subject_code } = req.query; // Get subject_code from URL parameter
     const { pages, costPrice, sellingPrice } = req.body; // Get data from request body
