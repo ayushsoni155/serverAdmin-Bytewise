@@ -3,10 +3,10 @@ import Cors from 'cors';
 
 // Initialize CORS middleware
 const cors = Cors({
-  methods: ['GET', 'PUT'], // Allow both GET and PUT methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+  methods: ['GET', 'PUT', 'OPTIONS'], // Allow GET, PUT, and preflight OPTIONS
+  allowedHeaders: ['Content-Type', 'Authorization'],
   origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
-  credentials: true, // Allow cookies if needed
+  credentials: true, // Allow credentials if needed
 });
 
 // Helper function to run middleware
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
 
   // Handle OPTIONS request (preflight)
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Methods', 'GET, PUT, OPTIONS');
+    res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
     res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -46,18 +46,18 @@ export default async function handler(req, res) {
   if (req.method === 'PUT') {
     const { subject_code } = req.query; // Get subject_code from URL parameter
     const { pages, costPrice, sellingPrice } = req.body; // Get data from request body
-  
+    
     // Validate required fields
     if (!pages || !costPrice || !sellingPrice) {
       return res.status(400).json({ error: 'All fields are required' });
     }
-  
+
     const query = `
       UPDATE productbw
       SET pages = ?, costPrice = ?, sellingPrice = ?
       WHERE subject_code = ?
     `;
-  
+    
     try {
       // Get a connection from the pool
       const conn = await db.getConnection();
