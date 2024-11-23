@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Subject code, field, and value are required.' });
     }
 
-    const allowedFields = ['product_name', 'cost_price', 'selling_price', 'pages'];
+    const allowedFields = ['product_name', 'costPrice', 'sellingPrice', 'pages'];
     if (!allowedFields.includes(field)) {
       return res.status(400).json({ error: 'Invalid field specified.' });
     }
