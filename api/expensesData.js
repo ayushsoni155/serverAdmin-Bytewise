@@ -52,7 +52,7 @@ export default async function handler(req, res) {
     const conn = await db.getConnection();
 
     // Fetch expenses data
-    const query = 'SELECT * FROM expenses';
+    const query = 'SELECT * FROM bytewise_db.expenses';
 
     const [results] = await conn.query(query);
 
