@@ -3,9 +3,9 @@ import Cors from 'cors';
 
 // Initialize CORS middleware
 const cors = Cors({
-  methods: ['PUT', 'OPTIONS'], // Allow PUT and preflight
+  methods: ['PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  origin: 'https://admin-bytewise24.vercel.app',
+  origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
   credentials: true,
 });
 
@@ -31,21 +31,25 @@ const db = mysql.createPool({
 
 export default async function handler(req, res) {
   try {
+    // Enable CORS for this API route
     await runMiddleware(req, res, cors);
 
+    // Handle OPTIONS request (preflight)
     if (req.method === 'OPTIONS') {
       res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app');
+      res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
       res.setHeader('Access-Control-Allow-Credentials', 'true');
-      return res.status(200).end();
+      return res.status(200).end(); // Preflight response
     }
 
+    // Only allow PUT requests
     if (req.method !== 'PUT') {
       return res.status(405).json({ message: 'Method Not Allowed' });
     }
 
-    const { subject_code } = req.query; // Get the subject_code from URL params
+    // Extract data from request
+    const { subject_code } = req.query; // Get subject_code from the URL
     const { field, value } = req.body; // Dynamic field and value from request body
 
     // Validate inputs
@@ -58,11 +62,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Invalid field specified.' });
     }
 
-    const query = `
-      UPDATE productbw
-      SET ${field} = ?
-      WHERE subject_code = ?
-    `;
+    const query = `UPDATE productbw SET ${field} = ? WHERE subject_code = ?`;
 
     const conn = await db.getConnection();
 
