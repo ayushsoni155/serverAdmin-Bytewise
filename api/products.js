@@ -5,7 +5,7 @@ import Cors from 'cors';
 const cors = Cors({
   methods: ['PUT', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  origin: 'https://admin-bytewise24.vercel.app/Product', // Replace with your frontend URL
+  origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
   credentials: true,
 });
 
@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     if (req.method === 'OPTIONS') {
       res.setHeader('Access-Control-Allow-Methods', 'PUT, OPTIONS');
       res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-      res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app/Product'); // Replace with your frontend URL
+      res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
       res.setHeader('Access-Control-Allow-Credentials', 'true');
       return res.status(200).end(); // Preflight response
     }
