@@ -50,8 +50,8 @@ export default async function handler(req, res) {
     }
 
     // Extract subject_code from URL and field/value from the body
-    const { subject_code } = req.query; // Subject code from the URL params
-    const { field, value } = req.body; // Dynamic field and value from the request body
+   // const { subject_code } = req.query; // Subject code from the URL params
+    const { subject_code,field, value } = req.body; // Dynamic field and value from the request body
 
     // Validate input fields
     if (!subject_code || !field || !value) {
