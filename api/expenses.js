@@ -21,6 +21,16 @@ function runMiddleware(req, res, fn) {
   });
 }
 
+// Helper function to generate a unique expensesID
+function generateExpensesID() {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let id = '';
+  for (let i = 0; i < 10; i++) {
+    id += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return id;
+}
+
 // Create MySQL connection pool
 const db = mysql.createPool({
   host: process.env.DB_HOST,
@@ -56,12 +66,16 @@ export default async function handler(req, res) {
   }
 
   try {
+    // Generate a unique expensesID
+    const expensesID = generateExpensesID();
+
     // Insert expense data into the database
     const query = `
-      INSERT INTO bytewise_db.expenses (expenses_items, expenses_amount, expenses_date, payment_by)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO bytewise_db.expenses (expensesID, expenses_items, expenses_amount, expenses_date, payment_by)
+      VALUES (?, ?, ?, ?, ?)
     `;
     const [result] = await db.execute(query, [
+      expensesID,
       expenses_items,
       expenses_amount,
       expenses_date,
@@ -72,7 +86,7 @@ export default async function handler(req, res) {
     return res.status(201).json({
       message: 'Expense saved successfully.',
       expense: {
-        expensesID: result.insertId, // MySQL auto-generated ID
+        expensesID,
         expenses_items,
         expenses_amount,
         expenses_date,
