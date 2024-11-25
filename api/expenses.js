@@ -85,13 +85,14 @@ export default async function handler(req, res) {
 
     // Insert fund data into the `funds` table
     const fundQuery = `
-      INSERT INTO bytewise_db.funds (fundID, fund_date, debit)
-      VALUES (?, ?, ?)
+      INSERT INTO bytewise_db.funds (fundID, fund_date, debit,debit_type)
+      VALUES (?, ?, ?, ?)
     `;
     const [fundResult] = await db.execute(fundQuery, [
       fundID,
       expenses_date,
       expenses_amount,
+      "Expenses"
     ]);
 
     // Send success response with expense details
