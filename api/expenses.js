@@ -21,8 +21,8 @@ function runMiddleware(req, res, fn) {
   });
 }
 
-// Helper function to generate a unique expensesID
-function generateExpensesID() {
+// Helper function to generate a unique ID
+function generateID() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   let id = '';
   for (let i = 0; i < 10; i++) {
@@ -66,20 +66,32 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Generate a unique expensesID
-    const expensesID = generateExpensesID();
+    // Generate unique IDs
+    const expensesID = generateID();
+    const fundID = generateID();
 
-    // Insert expense data into the database
-    const query = `
+    // Insert expense data into the `expenses` table
+    const expensesQuery = `
       INSERT INTO bytewise_db.expenses (expensesID, expenses_items, expenses_amount, expenses_date, payment_by)
       VALUES (?, ?, ?, ?, ?)
     `;
-    const [result] = await db.execute(query, [
+    const [expensesResult] = await db.execute(expensesQuery, [
       expensesID,
       expenses_items,
       expenses_amount,
       expenses_date,
       payment_by,
+    ]);
+
+    // Insert fund data into the `funds` table
+    const fundQuery = `
+      INSERT INTO bytewise_db.funds (fundID, fund_date, debit)
+      VALUES (?, ?, ?)
+    `;
+    const [fundResult] = await db.execute(fundQuery, [
+      fundID,
+      expenses_date,
+      expenses_amount,
     ]);
 
     // Send success response with expense details
