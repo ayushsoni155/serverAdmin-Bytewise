@@ -58,8 +58,7 @@ export default async function handler(req, res) {
         orders.transactionID,
         orders.order_date,
         COALESCE(orders.total_price, 0) AS total_price
-      FROM orders
-      ORDER BY orders.order_date DESC;
+      FROM orders WHERE completeStatus !='Canceelled'      ORDER BY orders.order_date DESC;
     `;
 
     // Execute the query
