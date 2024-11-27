@@ -57,7 +57,7 @@ export default async function handler(req, res) {
     // Fetch various dashboard statistics for the selected date
     const [totalUsersResult] = await conn.query('SELECT COUNT(*) AS totalUsers FROM user_info');
     const [todaysSaleResult] = await conn.query(
-      'SELECT SUM(total_price) AS todaysSale FROM orders WHERE DATE(order_date) = ?',
+      'SELECT SUM(total_price) AS todaysSale FROM orders WHERE  completeStatus != "Cancelled" AND DATE(order_date) = ?',
       [selectedDate]
     );
     const [pendingOrdersResult] = await conn.query(
