@@ -58,11 +58,11 @@ export default async function handler(req, res) {
   }
 
   // Extract data from request body
-  const { amount, type } = req.body; // `amount` is the transaction amount, `type` is 'credit' or 'debit'
+  const { amount } = req.body; // `amount` is the transaction amount, `type` is 'credit' or 'debit'
 
   // Validate input
-  if (!amount || isNaN(amount) || amount <= 0 || (type !== 'credit' && type !== 'debit')) {
-    return res.status(400).json({ error: 'Invalid input. Provide a valid amount and type (credit or debit).' });
+  if (!amount || isNaN(amount) || amount <= 0 ) {
+    return res.status(400).json({ error: 'Invalid input. Provide a valid amount' });
   }
 
   try {
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
 
     // Insert transaction into the `funds` table
     const query = `
-      INSERT INTO funds (fundID, fund_date, ${type})
+      INSERT INTO funds (fundID, fund_date, credit)
       VALUES (?, CURRENT_DATE(), ?)
     `;
     const [result] = await db.execute(query, [fundID, amount]);
