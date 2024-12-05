@@ -61,7 +61,7 @@ export default async function handler(req, res) {
   const { amount } = req.body; // `amount` is the transaction amount, `type` is 'credit' or 'debit'
 
   // Validate input
-  if (!amount || isNaN(amount) || amount <= 0 ) {
+  if (!amount || isNaN(amount)) {
     return res.status(400).json({ error: 'Invalid input. Provide a valid amount' });
   }
 
