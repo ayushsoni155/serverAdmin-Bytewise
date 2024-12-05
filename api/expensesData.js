@@ -3,10 +3,10 @@ import Cors from 'cors';
 
 // Initialize CORS middleware
 const cors = Cors({
-  methods: ['GET'], // Specify allowed methods
-  allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
-  origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend URL
-  credentials: true, // Allow cookies if needed
+  methods: ['GET'], // Allow only GET requests
+  allowedHeaders: ['Content-Type', 'Authorization'], // Define allowed headers
+  origin: 'https://admin-bytewise24.vercel.app', // Replace with your frontend origin
+  credentials: true, // Allow credentials for cross-origin requests
 });
 
 // Helper function to run middleware
@@ -33,36 +33,61 @@ export default async function handler(req, res) {
   // Enable CORS for this API route
   await runMiddleware(req, res, cors);
 
-  // Handle OPTIONS request (preflight)
+  // Handle OPTIONS preflight request
   if (req.method === 'OPTIONS') {
     res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     res.setHeader('Access-Control-Allow-Origin', 'https://admin-bytewise24.vercel.app'); // Replace with your frontend URL
     res.setHeader('Access-Control-Allow-Credentials', 'true');
-    return res.status(200).end(); // Preflight response
+    return res.status(200).end();
   }
 
-  // Only allow GET requests
+  // Allow only GET requests
   if (req.method !== 'GET') {
-    return res.status(405).json({ message: 'Method Not Allowed' });
+    return res.status(405).json({ error: 'Method Not Allowed. Use GET method.' });
   }
 
   try {
-    // Get a connection from the pool
-    const conn = await db.getConnection();
+    // Fetch available funds
+    const [fundsResult] = await db.execute(`
+      SELECT 
+        COALESCE(SUM(credit), 0) AS totalCredit, 
+        COALESCE(SUM(debit), 0) AS totalDebit 
+      FROM funds
+    `);
 
-    // Fetch expenses data
-    const query = 'SELECT * FROM bytewise_db.expenses';
+    const { totalCredit, totalDebit } = fundsResult[0];
+    const availableFunds = totalCredit - totalDebit;
 
-    const [results] = await conn.query(query);
+    // Fetch gross profit (Total Sales - Cost Price)
+    const [salesResult] = await db.execute(`
+      SELECT 
+        COALESCE(SUM(sale_price), 0) AS totalSales 
+      FROM sales 
+      WHERE status != 'cancelled'
+    `);
 
-    // Release the connection back to the pool
-    conn.release();
+    const [manualsResult] = await db.execute(`
+      SELECT 
+        COALESCE(SUM(cost_price), 0) AS totalCost 
+      FROM manuals
+    `);
 
-    // Send the response
-    res.status(200).json(results);
+    const totalSales = salesResult[0].totalSales;
+    const totalCost = manualsResult[0].totalCost;
+    const grossProfit = totalSales - totalCost;
+
+    // Calculate net profit (Gross Profit - Total Debit)
+    const netProfit = grossProfit - totalDebit;
+
+    // Respond with calculated values
+    return res.status(200).json({
+      availableFunds,
+      grossProfit,
+      netProfit,
+    });
   } catch (error) {
-    console.error('Error fetching expenses:', error);
-    res.status(500).json({ message: 'Failed to fetch expenses' });
+    console.error('Database error:', error);
+    return res.status(500).json({ error: 'Failed to fetch financial data. Please try again later.' });
   }
 }
