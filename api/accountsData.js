@@ -70,7 +70,8 @@ export default async function handler(req, res) {
     );
 
     const totalSales = salesResult[0]?.totalSales || 0;
-   const availableFunds = Number(totalCredit) - Number(totalDebit) + Number(totalSales);
+   const availableFunds = Number(totalCredit) - Number(totalDebit);
+     const CashInHand = Number(totalCredit) - Number(totalDebit) + Number(totalSales);
 
 
     // Fetch sales and respective manual cost prices
@@ -100,6 +101,7 @@ export default async function handler(req, res) {
     // Respond with calculated financial data
     return res.status(200).json({
       availableFunds,
+      CashInHand,
       grossProfit,
       netProfit,
     });
