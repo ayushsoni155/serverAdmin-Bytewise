@@ -58,25 +58,23 @@ export default async function handler(req, res) {
     const { totalCredit, totalDebit } = fundsResult[0];
     const availableFunds = totalCredit - totalDebit;
 
-    // Fetch total sales (excluding cancelled orders)
-    const [salesResult] = await db.execute(
+    // Fetch sales and respective manual cost prices
+    const [profitResult] = await db.execute(
       `SELECT 
-         COALESCE(SUM(total_price), 0) AS totalSales 
-       FROM orders
-       WHERE completeStatus != 'cancelled'`
+         o.total_price AS salePrice,
+         pb.costPrice AS costPrice
+       FROM orders o
+       JOIN productbw pb ON o.product_code = pb.product_code
+       WHERE o.completeStatus != 'cancelled'`
     );
-    const totalSales = salesResult[0].totalSales;
 
-    // Fetch total cost price
-    const [manualsResult] = await db.execute(
-      `SELECT 
-         COALESCE(SUM(costPrice), 0) AS totalCost 
-       FROM productbw`
-    );
-    const totalCost = manualsResult[0].totalCost;
+    // Calculate gross profit by iterating through results
+    let grossProfit = 0;
+    profitResult.forEach((row) => {
+      grossProfit += row.salePrice - row.costPrice;
+    });
 
-    // Calculate gross profit and net profit
-    const grossProfit = totalSales - totalCost;
+    // Calculate net profit
     const netProfit = grossProfit - totalDebit;
 
     // Respond with calculated financial data
