@@ -55,23 +55,33 @@ export default async function handler(req, res) {
          COALESCE(SUM(debit), 0) AS totalDebit 
        FROM funds`
     );
+
+    if (!fundsResult || fundsResult.length === 0) {
+      return res.status(500).json({ error: 'No funds data available.' });
+    }
+
     const { totalCredit, totalDebit } = fundsResult[0];
     const availableFunds = totalCredit - totalDebit;
 
     // Fetch sales and respective manual cost prices
     const [profitResult] = await db.execute(
       `SELECT 
-         o.total_price AS salePrice,
+         oi.item_quantity * oi.item_price AS salePrice,
          pb.costPrice AS costPrice
-       FROM orders o
-       JOIN productbw pb ON o.subject_code = pb.subject_code
+       FROM order_items oi
+       JOIN productbw pb ON oi.subject_code = pb.subject_code
+       JOIN orders o ON oi.orderID = o.orderID
        WHERE o.completeStatus != 'cancelled'`
     );
+
+    if (!profitResult || profitResult.length === 0) {
+      return res.status(500).json({ error: 'No profit data available.' });
+    }
 
     // Calculate gross profit by iterating through results
     let grossProfit = 0;
     profitResult.forEach((row) => {
-      grossProfit += row.salePrice - row.costPrice;
+      grossProfit += (row.salePrice || 0) - (row.costPrice || 0);
     });
 
     // Calculate net profit
