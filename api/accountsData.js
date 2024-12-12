@@ -67,7 +67,7 @@ export default async function handler(req, res) {
     const [profitResult] = await db.execute(
       `SELECT 
          oi.item_quantity * oi.item_price AS salePrice,
-         pb.costPrice AS costPrice
+         oi.item_quantity * pb.costPrice AS costPrice
        FROM order_items oi
        JOIN productbw pb ON oi.subject_code = pb.subject_code
        JOIN orders o ON oi.orderID = o.orderID
