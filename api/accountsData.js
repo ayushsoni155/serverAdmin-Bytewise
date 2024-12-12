@@ -70,7 +70,8 @@ export default async function handler(req, res) {
     );
 
     const totalSales = salesResult[0]?.totalSales || 0;
-    const availableFunds = totalCredit - totalDebit + totalSales;
+   const availableFunds = Number(totalCredit) - Number(totalDebit) + Number(totalSales);
+
 
     // Fetch sales and respective manual cost prices
     const [profitResult] = await db.execute(
