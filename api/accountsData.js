@@ -64,7 +64,7 @@ export default async function handler(req, res) {
          o.total_price AS salePrice,
          pb.costPrice AS costPrice
        FROM orders o
-       JOIN productbw pb ON o.product_code = pb.product_code
+       JOIN productbw pb ON o.subject_code = pb.subject_code
        WHERE o.completeStatus != 'cancelled'`
     );
 
