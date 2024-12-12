@@ -151,14 +151,14 @@ export default async function handler(req, res) {
     // Fetch Gross Profit (Total Sales - Cost Price)
     const [salesResult] = await db.execute(
       `SELECT 
-         COALESCE(SUM(sale_price), 0) AS totalSales 
-       FROM sales 
+         COALESCE(SUM(total_price), 0) AS totalSales 
+       FROM orders
        WHERE status != 'cancelled'`
     );
     const [manualsResult] = await db.execute(
       `SELECT 
-         COALESCE(SUM(cost_price), 0) AS totalCost 
-       FROM manuals`
+         COALESCE(SUM(costPrice), 0) AS totalCost 
+       FROM productbw`
     );
     const totalSales = salesResult[0].totalSales;
     const totalCost = manualsResult[0].totalCost;
