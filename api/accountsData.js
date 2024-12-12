@@ -198,7 +198,7 @@ export default async function handler(req, res) {
 
     // Respond with calculated financial data
     return res.status(200).json({
-      availableFunds,
+      availableFunds= availableFunds + totalSales,
       grossProfit,
       netProfit,
     });
