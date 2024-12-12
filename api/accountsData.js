@@ -166,7 +166,7 @@ export default async function handler(req, res) {
     const [salesResult] = await db.execute(
       `SELECT COALESCE(SUM(total_price), 0) AS totalSales 
        FROM orders 
-       WHERE completeStatus = 'complete'`
+       WHERE completeStatus = 'Completed'`
     );
 
     const totalSales = salesResult[0]?.totalSales || 0;
