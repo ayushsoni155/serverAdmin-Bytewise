@@ -7,7 +7,7 @@ const cors = Cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   origin: 'https://admin-bytewise24.vercel.app', // Your frontend origin
   credentials: true,
-});
+}); 
 
 // Helper function to run middleware
 function runMiddleware(req, res, fn) {
