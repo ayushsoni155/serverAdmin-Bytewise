@@ -1,7 +1,7 @@
 import mysql from 'mysql2/promise';
 import Cors from 'cors';
 
-// Initialize CORS middleware
+// Initialize CORS middleware 
 const cors = Cors({
   methods: ['POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
