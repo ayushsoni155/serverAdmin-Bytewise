@@ -94,12 +94,12 @@ export default async function handler(req, res) {
        JOIN 
           orders o ON oi.orderID = o.orderID
        WHERE 
-          DATE(o.order_date) = ? AND completeStatus='Pending'
+         completeStatus='Pending'
        GROUP BY 
           oi.subject_code, pd.product_name`,
       [selectedDate]
     );
-
+// DATE(o.order_date) = ? AND
     // Release the connection back to the pool
     conn.release();
 
