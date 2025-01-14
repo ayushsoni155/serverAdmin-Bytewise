@@ -57,6 +57,8 @@ export default async function handler(req, res) {
         orders.orderID,
         orders.order_date,
         orders.completeStatus,
+        orders.payment_Method,
+        orders.paymentStatus,
         user_info.name,
         user_info.enrolmentID,
         user_info.phone,
