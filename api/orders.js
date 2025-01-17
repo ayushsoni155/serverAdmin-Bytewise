@@ -83,7 +83,7 @@ export default async function handler(req, res) {
       }
 
       // Update paymentStatus next
-      const updatePaymentStatusQuery = 'UPDATE orders SET paymentStatus = ? WHERE orderID = ?';
+      const updatePaymentStatusQuery = "UPDATE orders SET paymentStatus = ? WHERE orderID = ? AND paymentMethod = 'Offline'";;
       console.log('Executing query for paymentStatus:', updatePaymentStatusQuery, [paymentStatus, orderID]);
       const [paymentStatusResult] = await conn.query(updatePaymentStatusQuery, [paymentStatus, orderID]);
 
