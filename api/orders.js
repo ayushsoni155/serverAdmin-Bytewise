@@ -66,15 +66,17 @@ export default async function handler(req, res) {
       paymentStatus = 'Null';
     }
 
+    console.log('Updating order with:', { orderID, completeStatus, paymentStatus });
+
     // Get a connection from the pool
     const conn = await db.getConnection();
 
     try {
       // Update order status in the database
-      const [result] = await conn.query(
-        'UPDATE orders SET completeStatus = ?, paymentStatus = ? WHERE orderID = ?',
-        [completeStatus, paymentStatus, orderID]
-      );
+      const query = 'UPDATE orders SET completeStatus = ?, paymentStatus = ? WHERE orderID = ?';
+      console.log('Executing query:', query, [completeStatus, paymentStatus, orderID]);
+
+      const [result] = await conn.query(query, [completeStatus, paymentStatus, orderID]);
 
       // Release the connection back to the pool
       conn.release();
