@@ -72,22 +72,31 @@ export default async function handler(req, res) {
     const conn = await db.getConnection();
 
     try {
-      // Update order status in the database
-      const query = 'UPDATE orders SET completeStatus = ?, paymentStatus = ? WHERE orderID = ?';
-      console.log('Executing query:', query, [completeStatus, paymentStatus, orderID]);
+      // Update completeStatus first
+      const updateCompleteStatusQuery = 'UPDATE orders SET completeStatus = ? WHERE orderID = ?';
+      console.log('Executing query for completeStatus:', updateCompleteStatusQuery, [completeStatus, orderID]);
+      const [completeStatusResult] = await conn.query(updateCompleteStatusQuery, [completeStatus, orderID]);
 
-      const [result] = await conn.query(query, [completeStatus, paymentStatus, orderID]);
+      if (completeStatusResult.affectedRows === 0) {
+        conn.release();
+        return res.status(404).json({ message: 'Order not found for completeStatus update' });
+      }
+
+      // Update paymentStatus next
+      const updatePaymentStatusQuery = 'UPDATE orders SET paymentStatus = ? WHERE orderID = ?';
+      console.log('Executing query for paymentStatus:', updatePaymentStatusQuery, [paymentStatus, orderID]);
+      const [paymentStatusResult] = await conn.query(updatePaymentStatusQuery, [paymentStatus, orderID]);
+
+      if (paymentStatusResult.affectedRows === 0) {
+        conn.release();
+        return res.status(404).json({ message: 'Order not found for paymentStatus update' });
+      }
 
       // Release the connection back to the pool
       conn.release();
 
-      // Check if any rows were updated
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Order not found' });
-      }
-
       // Send a success response
-      return res.status(200).json({ message: 'Order status updated successfully!' });
+      return res.status(200).json({ message: 'Order status and payment status updated successfully!' });
     } catch (queryError) {
       throw queryError; // Throw the error to be caught in the outer catch block
     } finally {
