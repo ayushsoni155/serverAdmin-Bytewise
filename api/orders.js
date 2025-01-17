@@ -57,14 +57,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Order ID and completeStatus are required' });
     }
 
+    let paymentStatus = '';
+    if (completeStatus === 'Completed') {
+      paymentStatus = 'Done';
+    } else if (completeStatus === 'Pending') {
+      paymentStatus = 'Not_Done';
+    } else {
+      paymentStatus = 'Null';
+    }
+
     // Get a connection from the pool
     const conn = await db.getConnection();
 
     try {
       // Update order status in the database
       const [result] = await conn.query(
-        'UPDATE orders SET completeStatus = ? WHERE orderID = ?',
-        [completeStatus, orderID]
+        'UPDATE orders SET completeStatus = ?, paymentStatus = ? WHERE orderID = ?',
+        [completeStatus, paymentStatus, orderID]
       );
 
       // Release the connection back to the pool
@@ -78,9 +87,10 @@ export default async function handler(req, res) {
       // Send a success response
       return res.status(200).json({ message: 'Order status updated successfully!' });
     } catch (queryError) {
-      // Release the connection in case of query failure
+      throw queryError; // Throw the error to be caught in the outer catch block
+    } finally {
+      // Ensure connection is released even if there's an error
       conn.release();
-      throw queryError;
     }
   } catch (error) {
     console.error('Error updating order status:', error);
