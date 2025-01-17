@@ -83,10 +83,10 @@ export default async function handler(req, res) {
       }
 
       // Check paymentMethod and update paymentStatus only if it is 'Offline'
-      const checkPaymentMethodQuery = 'SELECT paymentMethod FROM orders WHERE orderID = ?';
+      const checkPaymentMethodQuery = 'SELECT payment_Method FROM orders WHERE orderID = ?';
       const [paymentMethodResult] = await conn.query(checkPaymentMethodQuery, [orderID]);
 
-      if (paymentMethodResult.length > 0 && paymentMethodResult[0].paymentMethod === 'Offline') {
+      if (paymentMethodResult.length > 0 && paymentMethodResult[0].payment_Method === 'Offline') {
         // Update paymentStatus if paymentMethod is 'Offline'
         const updatePaymentStatusQuery = 'UPDATE orders SET paymentStatus = ? WHERE orderID = ?';
         console.log('Executing query for paymentStatus:', updatePaymentStatusQuery, [paymentStatus, orderID]);
