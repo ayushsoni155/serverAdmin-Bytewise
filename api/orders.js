@@ -57,7 +57,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Order ID and completeStatus are required' });
     }
 
-    // Determine paymentStatus based on completeStatus
     let paymentStatus = '';
     if (completeStatus === 'Completed') {
       paymentStatus = 'Done';
@@ -73,7 +72,7 @@ export default async function handler(req, res) {
     const conn = await db.getConnection();
 
     try {
-      // Update completeStatus
+      // Update completeStatus first
       const updateCompleteStatusQuery = 'UPDATE orders SET completeStatus = ? WHERE orderID = ?';
       console.log('Executing query for completeStatus:', updateCompleteStatusQuery, [completeStatus, orderID]);
       const [completeStatusResult] = await conn.query(updateCompleteStatusQuery, [completeStatus, orderID]);
@@ -83,37 +82,21 @@ export default async function handler(req, res) {
         return res.status(404).json({ message: 'Order not found for completeStatus update' });
       }
 
-      // Check paymentMethod before updating paymentStatus
-      const checkPaymentMethodQuery = 'SELECT paymentMethod FROM orders WHERE orderID = ?';
-      const [paymentMethodResult] = await conn.query(checkPaymentMethodQuery, [orderID]);
+      // Update paymentStatus next
+      const updatePaymentStatusQuery = 'UPDATE orders SET paymentStatus = ? WHERE orderID = ?';
+      console.log('Executing query for paymentStatus:', updatePaymentStatusQuery, [paymentStatus, orderID]);
+      const [paymentStatusResult] = await conn.query(updatePaymentStatusQuery, [paymentStatus, orderID]);
 
-      if (paymentMethodResult.length === 0) {
+      if (paymentStatusResult.affectedRows === 0) {
         conn.release();
-        return res.status(404).json({ message: 'Order not found for paymentMethod check' });
-      }
-
-      const paymentMethod = paymentMethodResult[0].paymentMethod;
-
-      if (paymentMethod === 'Offline') {
-        const updatePaymentStatusQuery = 'UPDATE orders SET paymentStatus = ? WHERE orderID = ?';
-        console.log('Executing query for paymentStatus:', updatePaymentStatusQuery, [paymentStatus, orderID]);
-        const [paymentStatusResult] = await conn.query(updatePaymentStatusQuery, [paymentStatus, orderID]);
-
-        if (paymentStatusResult.affectedRows === 0) {
-          conn.release();
-          return res.status(404).json({ message: 'Order not found for paymentStatus update' });
-        }
+        return res.status(404).json({ message: 'Order not found for paymentStatus update' });
       }
 
       // Release the connection back to the pool
       conn.release();
 
       // Send a success response
-      return res.status(200).json({
-        message: `Order status updated successfully! ${
-          paymentMethod === 'Offline' ? 'Payment status also updated.' : ''
-        }`,
-      });
+      return res.status(200).json({ message: 'Order status and payment status updated successfully!' });
     } catch (queryError) {
       throw queryError; // Throw the error to be caught in the outer catch block
     } finally {
