@@ -72,7 +72,7 @@ export default async function handler(req, res) {
     const conn = await db.getConnection();
 
     try {
-      // Update completeStatus first
+      // Update completeStatus for the order
       const updateCompleteStatusQuery = 'UPDATE orders SET completeStatus = ? WHERE orderID = ?';
       console.log('Executing query for completeStatus:', updateCompleteStatusQuery, [completeStatus, orderID]);
       const [completeStatusResult] = await conn.query(updateCompleteStatusQuery, [completeStatus, orderID]);
@@ -82,14 +82,20 @@ export default async function handler(req, res) {
         return res.status(404).json({ message: 'Order not found for completeStatus update' });
       }
 
-      // Update paymentStatus next
-      const updatePaymentStatusQuery = 'UPDATE orders SET paymentStatus = ? WHERE orderID = ?';
-      console.log('Executing query for paymentStatus:', updatePaymentStatusQuery, [paymentStatus, orderID]);
-      const [paymentStatusResult] = await conn.query(updatePaymentStatusQuery, [paymentStatus, orderID]);
+      // Check paymentMethod and update paymentStatus only if it is 'Offline'
+      const checkPaymentMethodQuery = 'SELECT paymentMethod FROM orders WHERE orderID = ?';
+      const [paymentMethodResult] = await conn.query(checkPaymentMethodQuery, [orderID]);
 
-      if (paymentStatusResult.affectedRows === 0) {
-        conn.release();
-        return res.status(404).json({ message: 'Order not found for paymentStatus update' });
+      if (paymentMethodResult.length > 0 && paymentMethodResult[0].paymentMethod === 'Offline') {
+        // Update paymentStatus if paymentMethod is 'Offline'
+        const updatePaymentStatusQuery = 'UPDATE orders SET paymentStatus = ? WHERE orderID = ?';
+        console.log('Executing query for paymentStatus:', updatePaymentStatusQuery, [paymentStatus, orderID]);
+        const [paymentStatusResult] = await conn.query(updatePaymentStatusQuery, [paymentStatus, orderID]);
+
+        if (paymentStatusResult.affectedRows === 0) {
+          conn.release();
+          return res.status(404).json({ message: 'Order not found for paymentStatus update' });
+        }
       }
 
       // Release the connection back to the pool
